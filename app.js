@@ -3,6 +3,9 @@ const logger = require('morgan');
 const axios = require('axios');
 const list = require('./data');
 
+
+
+//var apikey =	"0a7bc5fbd01564c3dc7b96c77700eb53";
 var app = express()
 const port = 3000
 
@@ -43,6 +46,22 @@ app.get('/musicSearch/:term', async (req, res) => {
     entity : "album",
   }
   var response = await axios.get('https://itunes.apple.com/search', {params : params}).catch(e => console.log(e));
+  console.log(response.data);
+  res.json(response.data);
+})
+
+app.get('/MusicRank', async(req,res)=>{//chart_name=top&page=1&page_size=5&country=it&f_has_lyrics=1
+  const params={
+    chart_name:"top",
+    page :1,
+    page_size :20,
+    country : "us",
+    f_has_lyrics:1,
+    apikey :	"0a7bc5fbd01564c3dc7b96c77700eb53",
+    
+  } // api규칙
+
+  var response = await axios.get('http://api.musixmatch.com/ws/1.1/chart.tracks.get', {params : params}).catch(e => console.log(e));
   console.log(response.data);
   res.json(response.data);
 })
