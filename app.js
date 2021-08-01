@@ -37,6 +37,20 @@ app.get('/music_list', (req,res) => {
   res.json(list);
 })
 
+app.get('/searchByArtist/:art', async (req, res) => {//id=549055025,366264156&entity=song&limit=5
+  const params = {
+    id : req.params.art,
+    entity : 'song',
+    limit : 5
+  }
+  var response = await axios.get('https://itunes.apple.com/lookup', {params : params}).catch(e => console.log(e));
+  console.log(response.data);
+  res.json(response.data); 
+})
+
+
+
+
 app.get('/musicSearch/:term', async (req, res) => {
   const params = {
     term : req.params.term,
