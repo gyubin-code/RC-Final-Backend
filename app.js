@@ -8,7 +8,7 @@ const { json } = require('express');
 
 //var apikey =	"0a7bc5fbd01564c3dc7b96c77700eb53";
 var app = express()
-const port = 3001
+const port = 3000
 
 app.use(express.json())
 app.use(express.urlencoded({'extended' : true}));
