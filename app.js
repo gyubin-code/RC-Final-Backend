@@ -2,12 +2,13 @@ var express = require('express');
 const logger = require('morgan');
 const axios = require('axios');
 const list = require('./data');
+const { json } = require('express');
 
 
 
 //var apikey =	"0a7bc5fbd01564c3dc7b96c77700eb53";
 var app = express()
-const port = 3000
+const port = 3001
 
 app.use(express.json())
 app.use(express.urlencoded({'extended' : true}));
@@ -50,18 +51,16 @@ app.get('/musicSearch/:term', async (req, res) => {
   res.json(response.data);
 })
 
-app.get('/MusicRank', async(req,res)=>{//chart_name=top&page=1&page_size=5&country=it&f_has_lyrics=1
+app.get('/MusicRank', async(req,res)=>{//?method=chart.gettoptracks&api_key=027928f67af091170f3707ec275b1d2e&format=json
   const params={
-    chart_name:"top",
-    page :1,
-    page_size :20,
-    country : "us",
-    f_has_lyrics:1,
-    apikey :	"0a7bc5fbd01564c3dc7b96c77700eb53",
-    
+    method: "chart.gettoptracks",
+    page : 1,
+    limit : 50,
+    api_key: "027928f67af091170f3707ec275b1d2e",
+    format: "json",
   } // api규칙
 
-  var response = await axios.get('http://api.musixmatch.com/ws/1.1/chart.tracks.get', {params : params}).catch(e => console.log(e));
+  var response = await axios.get('http://ws.audioscrobbler.com/2.0/', {params : params}).catch(e => console.log(e));
   console.log(response.data);
   res.json(response.data);
 })
