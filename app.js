@@ -121,10 +121,24 @@ app.get('/searchByArtist/:art', async (req, res) => {//id=549055025,366264156&en
 
 
 
-app.get('/musicSearch/:term', async (req, res) => {
+app.get('/musicSearch/:option/:term', async (req, res) => {
+  var opt;
+  switch(req.params.option){
+    case '1':
+      opt = 'song';
+      break;
+    case '2':
+      opt = 'musicArtist'
+      break;
+    case '3':
+      opt = 'album'
+      break;
+  }
+    
   const params = {
     term : req.params.term,
-    entity : "song",
+    entity : opt,
+    limit : 5
   }
   var response = await axios.get('https://itunes.apple.com/search', {params : params}).catch(e => console.log(e));
   console.log(response.data);
