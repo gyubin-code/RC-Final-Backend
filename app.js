@@ -89,10 +89,10 @@ app.get('/searchByLikes', async (req, res) => {
             })
         }
 
-    console.log("param:"+result);
+    const id_Params = result.join();
 
     const params = {
-       id :  result.pop()+","+result.pop()+","+result.pop()+","+result.pop(),
+       id :  id_Params,
        entity : 'song',
        limit : 0
     }
