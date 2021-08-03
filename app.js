@@ -2,8 +2,8 @@ var express = require('express');
 const logger = require('morgan');
 const axios = require('axios');
 const list = require('./data');
-const firebase = require('./firebase');
 const { json } = require('express');
+const firebase = require('./firebase');
 
 
 
@@ -12,7 +12,7 @@ var app = express()
 const port = 3000
 
 app.use(express.json())
-app.use(express.urlencoded({'extended' : true}));
+app.use(express.urlencoded({ 'extended': true }));
 app.use(logger('dev'));
 app.use(express.static('public'));   // html, image 등 정적파일 제공 폴더 지정
 
@@ -35,95 +35,166 @@ app.get('/user', (req, res) => {
 // curl -X POST localhost:3000/user -d '{"id" : "jyc", "name" : "Jae Young"}' -H "Content-Type: application/json"
 app.post('/user', (req, res) => {
   console.log(req.body.name);
-  res.send(req.body);    
+  res.send(req.body);
 })
 
-app.get('/music_list', (req,res) => {
+app.get('/music_list', (req, res) => {
   res.json(list);
 })
-app.get('/searchByArtist/:art', async (req, res) => {//id=549055025,366264156&entity=song&limit=5
-  const params = {
-    id : req.params.art,
-    entity : 'song',
-    limit : 5
+
+app.get('/getCollectionId', async (req, res) => {
+  let db = firebase.firestore();
+  const snapshot = await db.collection('likes_collection').get().catch(e => console.log(e));
+  let response = {};
+
+  if (snapshot.empty) {
+    console.log("No result");
+    res.json({});
+    return;
   }
-  var response = await axios.get('https://itunes.apple.com/lookup', {params : params}).catch(e => console.log(e));
+  else {
+    snapshot.forEach(doc => {
+      if (doc.data().like == true) {
+        response[doc.id] = doc.data().like;
+        console.log(doc.id, '=>', doc.data());
+      }
+    })
+  }
+  console.log(response);
+  res.json(response);
+})
+
+
+app.get('/getTrackId', async (req, res) => {
+
+  let db = firebase.firestore();
+  const snapshot = await db.collection('likes_track').get().catch(e => console.log(e));
+  let response = {};
+
+  if (snapshot.empty) {
+    console.log("No result");
+    res.json({});
+    return;
+  }
+  else {
+    snapshot.forEach(doc => {
+      if (doc.data().like == true) {
+        response[doc.id] = doc.data().like;
+        console.log(doc.id, '=>', doc.data());
+      }
+    })
+  }
+  console.log(response);
+  res.json(response);
+})
+
+app.get('/getArtistId', async (req, res) => {
+
+  let db = firebase.firestore();
+  const snapshot = await db.collection('likes_artist').get().catch(e => console.log(e));
+  let response = {};
+
+  if (snapshot.empty) {
+    console.log("No result");
+    res.json({});
+    return;
+  }
+  else {
+    snapshot.forEach(doc => {
+      if (doc.data().like == true) {
+        response[doc.id] = doc.data().like;
+        console.log(doc.id, '=>', doc.data());
+      }
+    })
+  }
+  console.log(response);
+  res.json(response);
+})
+
+app.get('/getFeed', async (req, res) => {
+
+  let db = firebase.firestore();
+  const snapshot = await db.collection('likes_artist').get().catch(e => console.log(e));
+  let result = [];
+
+  if (snapshot.empty) {
+    console.log("No result");
+    res.json([]);
+    return;
+  }
+  else {
+    snapshot.forEach(doc => {
+      if (doc.data().like == true) {
+        result.push(doc.id)
+        console.log(doc.id, '=>', doc.data());
+      }
+    })
+  }
+  const artists = result.join();
+  console.log(artists);
+
+  const params = {
+    id: artists,
+    entity: 'song',
+    limit: 5
+  }
+  let response = await axios.get('https://itunes.apple.com/lookup', { params: params }).catch(e => console.log(e));
   console.log(response.data);
   res.json(response.data);
 })
 
-app.get('/getCollectionId'), async(req,res)=>{
-    var db = firebase.firestore();
-    const snapshot = await db.collection('likes').get().catch(e => console.log(e));
-    var response = [];
-
-    if (snapshot.empty) {
-        console.log("No result");
-        res.json([]);
-        return;
-        }
-    else {
-        snapshot.forEach(doc => {
-            if(doc.data().like==true){
-                response.push(doc.id)
-                console.log(doc.id, '=>', doc.data());
-            }
-        })
-    }
-    res.send(response.data);
-}
 
 app.get('/searchByLikes', async (req, res) => {
-    var db = firebase.firestore();
-        const snapshot = await db.collection('likes').get().catch(e => console.log(e));
-    var result = [];
+  let db = firebase.firestore();
+  const snapshot = await db.collection('likes_track').get().catch(e => console.log(e));
+  let result = [];
 
-    if (snapshot.empty) {
-        console.log("No result");
-        res.json([]);
-        return;
-        }
-        else {
-            snapshot.forEach(doc => {
-                if(doc.data().like==true){
-                    result.push(doc.id)
-                    console.log(result);
-                    console.log(doc.id, '=>', doc.data());
-                }
-            })
-        }
+  if (snapshot.empty) {
+    console.log("No result");
+    res.json([]);
+    return;
+  }
+  else {
+    snapshot.forEach(doc => {
+      if (doc.data().like == true) {
+        result.push(doc.id)
+        console.log(result);
+        console.log(doc.id, '=>', doc.data());
+      }
+    })
+  }
 
-    const id_Params = result.join();
+  const id_Params = result.join();
 
-    const params = {
-       id :  id_Params,
-       entity : 'song',
-       limit : 0
-    }
+  const params = {
+    id: id_Params,
+    entity: 'song',
+    limit: 0
+  }
 
-    var response = await axios.get('https://itunes.apple.com/lookup',{params : params}).catch(e => console.log(e));
-    console.log(response.data);
-    res.json(response.data);
+  var response = await axios.get('https://itunes.apple.com/lookup', { params: params }).catch(e => console.log(e));
+  console.log(response.data);
+  res.json(response.data);
 
 })
 
 app.get('/searchByArtist/:art', async (req, res) => {//id=549055025,366264156&entity=song&limit=5
   const params = {
-    id : req.params.art,
-    entity : 'song',
-    limit : 5
+    id: req.params.art,
+    entity: 'song',
+    limit: 5
   }
-  var response = await axios.get('https://itunes.apple.com/lookup', {params : params}).catch(e => console.log(e));
+  let response = await axios.get('https://itunes.apple.com/lookup', { params: params }).catch(e => console.log(e));
   console.log(response.data);
-  res.json(response.data); 
+  res.json(response.data);
 })
 
 
 
 
 app.get('/musicSearch/:option/:term', async (req, res) => {
-  var opt;
-  switch(req.params.option){
+  let opt;
+  switch (req.params.option) {
     case '1':
       opt = 'song';
       break;
@@ -134,27 +205,27 @@ app.get('/musicSearch/:option/:term', async (req, res) => {
       opt = 'album'
       break;
   }
-    
+
   const params = {
-    term : req.params.term,
-    entity : opt,
-    limit : 5
+    term: req.params.term,
+    entity: opt,
+    limit: 50
   }
-  var response = await axios.get('https://itunes.apple.com/search', {params : params}).catch(e => console.log(e));
+  let response = await axios.get('https://itunes.apple.com/search', { params: params }).catch(e => console.log(e));
   console.log(response.data);
   res.json(response.data);
 })
 
-app.get('/MusicRank', async(req,res)=>{//?method=chart.gettoptracks&api_key=027928f67af091170f3707ec275b1d2e&format=json
-  const params={
+app.get('/MusicRank', async (req, res) => {//?method=chart.gettoptracks&api_key=027928f67af091170f3707ec275b1d2e&format=json
+  const params = {
     method: "chart.gettoptracks",
-    page : 1,
-    limit : 50,
+    page: 1,
+    limit: 50,
     api_key: "027928f67af091170f3707ec275b1d2e",
     format: "json",
   } // api규칙
 
-  var response = await axios.get('http://ws.audioscrobbler.com/2.0/', {params : params}).catch(e => console.log(e));
+  let response = await axios.get('http://ws.audioscrobbler.com/2.0/', { params: params }).catch(e => console.log(e));
   console.log(response.data);
   res.json(response.data);
 })
