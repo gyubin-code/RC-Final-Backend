@@ -124,7 +124,7 @@ app.get('/searchByArtist/:art', async (req, res) => {//id=549055025,366264156&en
 app.get('/musicSearch/:term', async (req, res) => {
   const params = {
     term : req.params.term,
-    entity : "album",
+    entity : "song",
   }
   var response = await axios.get('https://itunes.apple.com/search', {params : params}).catch(e => console.log(e));
   console.log(response.data);
