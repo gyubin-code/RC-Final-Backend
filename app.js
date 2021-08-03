@@ -3,7 +3,11 @@ const logger = require('morgan');
 const axios = require('axios');
 const list = require('./data');
 const firebase = require('./firebase');
+const { json } = require('express');
 
+
+
+//var apikey =	"0a7bc5fbd01564c3dc7b96c77700eb53";
 var app = express()
 const port = 3000
 
@@ -103,12 +107,40 @@ app.get('/searchByLikes', async (req, res) => {
 
 })
 
+app.get('/searchByArtist/:art', async (req, res) => {//id=549055025,366264156&entity=song&limit=5
+  const params = {
+    id : req.params.art,
+    entity : 'song',
+    limit : 5
+  }
+  var response = await axios.get('https://itunes.apple.com/lookup', {params : params}).catch(e => console.log(e));
+  console.log(response.data);
+  res.json(response.data); 
+})
+
+
+
+
 app.get('/musicSearch/:term', async (req, res) => {
   const params = {
     term : req.params.term,
     entity : "album",
   }
   var response = await axios.get('https://itunes.apple.com/search', {params : params}).catch(e => console.log(e));
+  console.log(response.data);
+  res.json(response.data);
+})
+
+app.get('/MusicRank', async(req,res)=>{//?method=chart.gettoptracks&api_key=027928f67af091170f3707ec275b1d2e&format=json
+  const params={
+    method: "chart.gettoptracks",
+    page : 1,
+    limit : 50,
+    api_key: "027928f67af091170f3707ec275b1d2e",
+    format: "json",
+  } // api규칙
+
+  var response = await axios.get('http://ws.audioscrobbler.com/2.0/', {params : params}).catch(e => console.log(e));
   console.log(response.data);
   res.json(response.data);
 })
