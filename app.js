@@ -136,7 +136,8 @@ app.get('/getFeed', async (req, res) => {
   const params = {
     id: artists,
     entity: 'song',
-    limit: 5
+    limit: 5,
+    sort: 'recent'
   }
   let response = await axios.get('https://itunes.apple.com/lookup', { params: params }).catch(e => console.log(e));
   console.log(response.data);
